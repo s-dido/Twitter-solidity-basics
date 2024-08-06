@@ -10,13 +10,18 @@ contract Twitter{
         uint256 likes;
     }
 
-    uint16 constant Tweet_max_length = 280;
+    address public owner;
+    uint256 public TWEET_MAX_LENGTH = 280;
+    
+    constructor(){
+        owner = msg.sender;
+    }
 
     mapping ( address => Tweet[] ) tweets;
 
     function createTweet(string memory _tweet) public {
         
-        require (bytes(_tweet).length <= Tweet_max_length, "tweet to long");
+        require ( bytes(_tweet).length <= TWEET_MAX_LENGTH, "tweet is to long");
 
         Tweet memory newTweet = Tweet({
         author: msg.sender,
@@ -26,6 +31,15 @@ contract Twitter{
 
         });
             tweets[msg.sender].push(newTweet);
+        }
+
+        modifier onlyOwner(){
+            require(msg.sender == owner, "ONLY THE OWNER CAN DO THIS");
+            _;
+        }
+
+        function changeTweetLength (uint256 _newTweetLength) public onlyOwner {
+            TWEET_MAX_LENGTH = _newTweetLength;
         }
 
         function getTweet ( uint _i) public view returns (Tweet memory){
