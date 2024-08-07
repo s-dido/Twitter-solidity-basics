@@ -4,6 +4,7 @@ pragma solidity ^0.8.26;
 contract Twitter{
 
     struct Tweet {
+        uint256 id;
         address author;
         string content;
         uint256 timestamp;
@@ -24,6 +25,7 @@ contract Twitter{
         require ( bytes(_tweet).length <= TWEET_MAX_LENGTH, "tweet is to long");
 
         Tweet memory newTweet = Tweet({
+        id: tweets[msg.sender].length,
         author: msg.sender,
         content: _tweet,
         timestamp: block.timestamp,
@@ -32,6 +34,19 @@ contract Twitter{
         });
             tweets[msg.sender].push(newTweet);
         }
+
+        function likeTweet (address author, uint256 id) external  {
+            
+            require(tweets[author][id].id == id, "Tweet does not exist");
+             tweets[author][id].likes++;
+        }
+
+        function unLikeTweet(address author, uint256 id) external {
+            
+            require(tweets[author][id].likes > 0 && tweets[author][id].id == id, "This tweet has no have likes or does not exist");
+            tweets[author][id].likes--;
+        } 
+
 
         modifier onlyOwner(){
             require(msg.sender == owner, "ONLY THE OWNER CAN DO THIS");
