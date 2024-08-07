@@ -3,6 +3,9 @@ pragma solidity ^0.8.26;
 
 contract Twitter{
 
+    address public owner;
+    uint256 public TWEET_MAX_LENGTH = 280;
+    
     struct Tweet {
         uint256 id;
         address author;
@@ -11,14 +14,15 @@ contract Twitter{
         uint256 likes;
     }
 
-    address public owner;
-    uint256 public TWEET_MAX_LENGTH = 280;
-    
     constructor(){
         owner = msg.sender;
     }
 
     mapping ( address => Tweet[] ) tweets;
+
+    event TweetCreated(uint256 id, address author, string content, uint256 timestamp, uint256 likes);
+    event TweetLiked (address liker, address tweetAuthot, uint256 id, uint256 newLikeCount);
+    event TweetUnLiked (address unLiker, address tweetAuthot, uint256 id, uint256 newLikeCount);
 
     function createTweet(string memory _tweet) public {
         
@@ -32,19 +36,25 @@ contract Twitter{
         likes: 0
 
         });
-            tweets[msg.sender].push(newTweet);
+            tweets[msg.sender].push(newTweet); 
+
+            emit TweetCreated(newTweet.id, newTweet.author, newTweet.content, newTweet.timestamp, newTweet.likes);   
         }
 
         function likeTweet (address author, uint256 id) external  {
             
             require(tweets[author][id].id == id, "Tweet does not exist");
              tweets[author][id].likes++;
+        
+            emit TweetLiked(msg.sender, author, id, tweets[author][id].likes);
         }
 
         function unLikeTweet(address author, uint256 id) external {
             
             require(tweets[author][id].likes > 0 && tweets[author][id].id == id, "This tweet has no have likes or does not exist");
             tweets[author][id].likes--;
+
+            emit TweetUnLiked(msg.sender, author, id, tweets[author][id].likes);
         } 
 
 
